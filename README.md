@@ -50,7 +50,7 @@ This folder includes the documents required to set up and deploy Streamlit on Cl
 
 This file contains the complete code for our M5Stack. It defines the Flask routes and establishes an effective and relevant layout. Here’s a summary of its functions and the information displayed on the screen:
 
-- Weather announcements triggered by the motion detector, limited to once per minute to avoid spam. These announcements are generated using a GPT-3.5 prompt and information from the OpenWeather API.
+- Weather announcements triggered by the motion detector, limited to once per minute to avoid spam. These announcements Text-to-Speech are generated using a GPT-3.5 prompt and information from the OpenWeather API.
 - Vibration alert when CO2 levels exceed 600 ppm, indicating poor air quality.
 - LED indicators: Red when humidity is between 40-59%, blue when above 60%, and green when below 40%.
 
