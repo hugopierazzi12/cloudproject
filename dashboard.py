@@ -7,7 +7,8 @@ import requests
 import datetime
 
 # Service account key details
-service_account_info = {key_json
+service_account_info = {
+    XXX
 }
 
 credentials = service_account.Credentials.from_service_account_info(service_account_info)
@@ -16,7 +17,8 @@ client = bigquery.Client(credentials=credentials, project=credentials.project_id
 
 def get_data_from_bigquery():
     query = """
-    SELECT * FROM `cloudproject-424110.weather_data.weather_records`
+    SELECT date, time, indoor_temp, indoor_humidity, outdoor_temp, outdoor_humidity, outdoor_weather
+    FROM `cloudproject-424110.weather_data.weather_records`
     ORDER BY date DESC, time DESC
     """
     query_job = client.query(query)
