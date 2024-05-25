@@ -62,19 +62,19 @@ This file contains the complete code for our M5Stack. It defines the Flask route
 - Wifi solution: In the event of a connection failure, you can have back-up wifis.
 
 
-| Kevin | Hugo |
-|-------|------|
-|       |      |
-
-
 <table>
   <tr>
     <th style="background-color:lightblue;">Kevin</th>
     <th style="background-color:lightgreen;">Hugo</th>
   </tr>
   <tr>
-    <td style="background-color:#f0f0f0; height:200px;"></td>
-    <td style="background-color:#f0f0f0; height:200px;"></td>
+    <td style="background-color:#f0f0f0; height:200px;">
+      M5Stack Visual, Sensors, Flask
+    </td>
+    <td style="background-color:#f0f0f0; height:200px;">
+      Flask
+    </td>
   </tr>
 </table>
+
 
