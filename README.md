@@ -69,7 +69,7 @@ This file contains the complete code for our M5Stack. It defines the Flask route
 - Wifi solution: In the event of a connection failure, you can have back-up wifis.
 
 <p align="center">
-  <img src="https://imgur.com/3pisUPv.png" alt="Google Weather" style="width:50%;">
+  <img src="https://imgur.com/AzPbQLW.png" alt="Google Weather" style="width:50%;">
 </p>
 
 <br>
