@@ -38,6 +38,13 @@ Our device comes with several functionalities:
 
 Our Dashboard, like our device, enables you to view various indoor and outdoor weather data, along with historical data presented in graphs and tables.
 
+<p align="center">
+  <img src="https://imgur.com/3pisUPv" alt="Google Weather" style="width:50%;">
+</p>
+
+<br>
+
+
 ## Project Structure
 
 ### Flask Folder
