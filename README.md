@@ -62,3 +62,9 @@ This file contains the complete code for our M5Stack. It defines the Flask route
 - Wifi solution: In the event of a connection failure, you can have back-up wifis.
 
 
+| Kevin | Hugo |
+|-------|------|
+|       |      |
+
+
+
