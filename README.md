@@ -13,7 +13,6 @@
 ## Trailer and Explanation
 
 [Youtube Video](https://youtu.be/xZMuOwHl4E0) 
-
 <br>
 
 ## Google Weather IoT Solution
