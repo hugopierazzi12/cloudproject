@@ -76,6 +76,13 @@ This file contains the complete code for our M5Stack. It defines the Flask route
 
 <br>
 
+## Screen Presentation and Design Choices
+
+For the presentation of our screen on the M5Stack device, we decided to display all the information on a single page. This approach simplifies the use of the device and provides a quick overview of all the necessary weather information. Our goal is to make the interface intuitive by using icons, which is especially important given the small screen size. The weather forecast for the next five days is also displayed, specifically at noon, to give users a practical overview of upcoming conditions.
+
+To enhance the user experience, we integrated vocal announcements of the current weather, triggered by the motion sensor. This feature allows users to get the weather information just before leaving the house. Additionally, the information is updated every three seconds to ensure real-time accuracy. These design choices were made to maximize usability and efficiency in a compact and user-friendly format.
+
+
 ## Distribution of Work
 
 <table style="width:100%; border: 2px solid black;">
