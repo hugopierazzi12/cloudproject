@@ -68,6 +68,12 @@ This file contains the complete code for our M5Stack. It defines the Flask route
 - LED indicators: Red when humidity is between 40-59%, blue when above 60%, and green when below 40%.
 - Wifi solution: In the event of a connection failure, you can have back-up wifis.
 
+<p align="center">
+  <img src="https://imgur.com/3pisUPv.png" alt="Google Weather" style="width:50%;">
+</p>
+
+<br>
+
 <br>
 
 ## Distribution of Work
