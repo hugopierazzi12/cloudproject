@@ -10,8 +10,7 @@
 
 <br>
 
-
-##Google Weather IoT Solution
+## Google Weather IoT Solution
 
 We are excited to introduce our IoT solution, **Google Weather**. Our product provides a variety of measurements, including:
 
