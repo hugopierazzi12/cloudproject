@@ -1,0 +1,366 @@
+from m5stack import * # Import M5Stack library
+from m5stack_ui import * # Import M5Stack UI library
+from uiflow import * # Import UIFlow library
+from m5stack import lcd # Import LCD control from M5Stack
+import unit # Import unit for sensor management
+import urequests # Import urequests for HTTP requests
+import json # Import JSON library for handling JSON data
+import time # Import time library for timing functions
+import ntptime # Import ntptime for network time protocol functions
+import utime # Import utility time functions
+import _thread # Import threading library
+from urllib.parse import quote # Import URL quoting for handling URLs
+
+# Initialize the M5Stack screen
+screen = M5Screen()
+lcd.clear(0x000000)  # Clear the screen with black color
+
+# Define the URL for the logo icon
+icon_url_logo = 'https://i.ibb.co/ZgWFRwk/file.png'
+icon_bitmap_logo = urequests.get(icon_url_logo).content  # Download the logo icon
+lcd.image(0, 0, icon_bitmap_logo)  # Display the logo icon at coordinates (0, 0)
+
+# Initialize sensors
+env3_0 = unit.get(unit.ENV3, unit.PORTA)  # Humidity sensor
+pir_0 = unit.get(unit.PIR, unit.PORTB)    # Motion sensor
+tvoc_1 = unit.get(unit.TVOC, unit.PORTC)  # Air quality sensor
+
+# URL of the Flask endpoint
+endpoint_url = "https://weather-monitor-zsladhfraq-ew.a.run.app/send-to-bigquery"
+password_hash = "99058ec580899c894b19c67e95eb765cab14f1d4404d57cbf8ed15fb81d2bcbc"
+api_key = "dc205f6b07d82ca369a1a66980ea5009"
+latitude = 41.51
+longitude = 6.6
+
+# Abbreviations for the days of the week
+day_abbr = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+# Base configuration
+base_url = "https://weather-monitor-zsladhfraq-ew.a.run.app"
+
+# Function to convert text to speech and play it
+def text_to_speech_and_play(text):
+    url = "{}/get_text_to_speech?text={}".format(base_url, quote(text))
+    
+    try:
+        response = urequests.get(url)
+        if response.status_code == 200:
+            with open('/flash/output.wav', 'wb') as f:
+                f.write(response.content)
+            play_audio('/flash/output.wav')
+        else:
+            lcd.print(".", 0, 0)
+    except Exception as e:
+        lcd.print(".", 0, 40)
+
+# Function to play the audio file
+def play_audio(file_path):
+    try:
+        speaker.playWAV(file_path, volume=6)
+    except Exception as e:
+        lcd.print("!", 0, 60)
+
+# Function to test the /get_weather_advice method
+def test_weather_advice():
+    url = "{}/get_weather_advice".format(base_url)
+    
+    try:
+        response = urequests.get(url)
+        if response.status_code == 200:
+            advice = response.json().get("advice", "No advice available")
+            text_to_speech_and_play(advice)
+        else:
+            lcd.print("Failed to get weather advice", 0, 80)
+    except Exception as e:
+        lcd.print("Error: " + str(e), 0, 120)
+
+# Synchronize with NTP to get the current date and time
+def sync_ntp_time():
+    try:
+        rtc.settime('ntp', host='ch.pool.ntp.org', tzone=2)
+        print("Synchronisation NTP réussie.")
+    except Exception as e:
+        print("Erreur lors de la synchronisation avec NTP:", e)
+
+# Function to get the current date and time strings
+def get_datetime_strings():
+    try:
+        dt = rtc.datetime()  # Get the current datetime tuple from RTC
+        # Format the date string for BigQuery (Year-Month-Day)
+        date_string_bq = "{:04d}-{:02d}-{:02d}".format(dt[0], dt[1], dt[2])
+        # Format the time string for BigQuery (Hour:Minute:Second)
+        time_string_bq = "{:02}:{:02}:{:02}".format(dt[4], dt[5], dt[6])
+        # Format the date string for display (Month/Day)
+        date_string_display = "{:02d}/{:02d}".format(dt[1], dt[2])
+        # Format the time string for display (Hour:Minute)
+        time_string_display = "{:02}:{:02}".format(dt[4], dt[5])
+        return date_string_bq, time_string_bq, date_string_display, time_string_display
+    except Exception as e:
+        print("Erreur lors de la récupération de l'heure actuelle:", e)
+        return None, None, None, None
+
+# Function to get the outdoor weather
+def get_outdoor_weather():
+    url = 'https://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&appid={}&units=metric'.format(latitude, longitude, api_key)
+    response = urequests.get(url)
+    
+    if response.status_code != 200:
+        print("Erreur: Impossible d'obtenir la météo extérieure, statut HTTP:", response.status_code)
+        return None
+    
+    data = response.json()
+    print("Réponse de l'API OpenWeatherMap:", data)  # Added for debugging the response
+    
+    if 'main' in data and 'temp' in data['main']:
+        outdoor_temp = data['main']['temp']
+        return outdoor_temp
+    else:
+        print("Erreur: Format de réponse inattendu de l'API")
+        return None
+
+# Function to get 5-day weather forecast only at noon
+def get_5_day_forecast():
+    url = 'https://api.openweathermap.org/data/2.5/forecast?lat={}&lon={}&appid={}&units=metric'.format(latitude, longitude, api_key)
+    response = urequests.get(url)
+    
+    if response.status_code != 200:
+        print("Erreur: Impossible d'obtenir les prévisions météorologiques, statut HTTP:", response.status_code)
+        return None
+    
+    data = response.json()
+    if 'list' in data:
+        forecast_list = data['list']
+        outdoor_forecast = []
+        for forecast in forecast_list:
+            # Check if the time is noon
+            if forecast['dt_txt'].split()[1] == '12:00:00':
+                date = forecast['dt_txt']
+                temp = forecast['main']['temp']
+                icon = forecast['weather'][0]['icon']
+                outdoor_forecast.append({'date': date, 'temp': temp, 'icon': icon})
+                if len(outdoor_forecast) >= 5:  # Limit to 5 forecasts
+                    break
+        return outdoor_forecast
+    else:
+        print("Erreur: Format de réponse inattendu de l'API")
+        return None
+        
+# Function to get the day abbreviation
+def get_day_abbr(date_str):
+    # Extract the year, month, and day from the date
+    year, month, day = map(int, date_str.split()[0].split('-'))
+    # Calculate the day of the week using Zeller's Congruence
+    if month < 3:
+        month += 12
+        year -= 1
+    K = year % 100
+    J = year // 100
+    f = day + ((13 * (month + 1)) // 5) + K + (K // 4) + (J // 4) - (2 * J)
+    day_of_week = (f % 7 + 6) % 7  # Adjust to 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    return day_abbr[day_of_week]
+
+# Function to display all values on a single page
+def display_static_info(outdoor_temp, outdoor_forecast):
+    lcd.clear(0x6fdddb)  # Clear the screen with a specific color
+
+    if outdoor_forecast:
+        for i, forecast in enumerate(outdoor_forecast):
+            day_abbr = get_day_abbr(forecast['date'])  # Get the day abbreviation
+            temp = forecast['temp']
+            icon_url = 'http://openweathermap.org/img/wn/{}.png'.format(forecast['icon'])
+            icon_bitmap = urequests.get(icon_url).content  # Download the weather icon
+            
+            # Specify the x and y coordinates for each day, and the location of the temperature and weather icon
+            if i == 0:
+                x = 115
+                y = 140
+                temp_x = 115
+                temp_y = 155
+                icon_x = 125
+                icon_y = 100
+            elif i == 1:
+                x = 215
+                y = 140
+                temp_x = 215
+                temp_y = 155
+                icon_x = 230
+                icon_y = 100
+            elif i == 2:
+                x = 2
+                y = 200
+                temp_x = 2
+                temp_y = 215
+                icon_x = 15
+                icon_y = 160
+            elif i == 3: 
+                x = 115
+                y = 200
+                temp_x = 115
+                temp_y = 215
+                icon_x = 130
+                icon_y = 160
+            elif i == 4:
+                x = 215
+                y = 200
+                temp_x = 215
+                temp_y = 215
+                icon_x = 230
+                icon_y = 160
+            
+            # Display the day, temperature, and weather icon at the specified coordinates
+            lcd.print("{}".format(day_abbr), x, y, lcd.BLACK)
+            lcd.print("{:.0f}°C".format(temp), temp_x, temp_y, lcd.BLACK)
+            lcd.image(icon_x, icon_y, icon_bitmap, scale=1)  # Display the weather icon
+            
+            icon_url_temp = 'https://cdn.iconscout.com/icon/premium/png-48-thumb/temperature-10-116621.png'
+            icon_bitmap_temp = urequests.get(icon_url_temp).content  # Download the temperature icon
+            lcd.image(10, 60, icon_bitmap_temp)  # Display the temperature icon
+            
+            icon_url_humidity = 'https://cdn.iconscout.com/icon/premium/png-24-thumb/humidity-7864537-6409875.png'
+            icon_bitmap_humidity = urequests.get(icon_url_humidity).content  # Download the humidity icon
+            lcd.image(212, 60, icon_bitmap_humidity)  # Display the humidity icon
+
+            icon_url_co2 = 'https://cdn.iconscout.com/icon/premium/png-24-thumb/co2-2092251-1763427.png'
+            icon_bitmap_co2 = urequests.get(icon_url_co2).content  # Download the CO2 icon
+            lcd.image(212, 85, icon_bitmap_co2)  # Display the CO2 icon
+
+# Function to display sensor information
+def display_sensor_info():
+    temperature = env3_0.temperature
+    humidity = env3_0.humidity
+    co2 = tvoc_1.eCO2
+    motionSensor = pir_0.state
+    _, _, date_string_display, time_string_display = get_datetime_strings()  # Use the new function to get the current time
+    if date_string_display and time_string_display:
+        # Display the date in large size
+        lcd.font(lcd.FONT_DejaVu24)  # Select a font
+        lcd.fontSize(4)  # Set the font size (1 to 4)
+        lcd.print("{}".format(date_string_display), 10, 15, lcd.BLACK)  # Display the month and day in large size
+        lcd.print("{}".format(time_string_display), 240, 15, lcd.BLACK)
+        lcd.print("Lausannne", 95, 15, lcd.BLACK)
+
+        # Display the sensor data
+        lcd.font(lcd.FONT_DejaVu18)  # Select a font
+        lcd.fontSize(3)  # Set the font size (1 to 4)
+        lcd.print("In:", 62, 65, lcd.BLACK)
+        lcd.print("Out:", 62, 90, lcd.BLACK)
+        #lcd.print("Temp.", 10, 70, lcd.BLACK) #Inside
+
+        lcd.print("{:.1f}°C".format(outdoor_temp), 120, 90, lcd.BLACK) # Display outdoor temperature
+        lcd.print("{:.1f}°C".format(temperature), 120, 65, lcd.BLACK) # Display indoor temperature
+
+        lcd.print("NEXT", 25, 140, lcd.BLACK) # Display label for next days
+        lcd.print("DAYS", 25, 155, lcd.BLACK) # Display label for next days 
+      
+        lcd.print("{:.1f}%".format(humidity), 250, 65, lcd.BLACK) # Display humidity
+        lcd.print("{}".format(co2), 250, 90, lcd.BLACK) # Display CO2 level
+        #lcd.print("Move: {}".format(motionSensor), 150, 100, lcd.BLACK)
+
+# Control the built-in RGB LEDs based on humidity
+    if 40 <= humidity <= 59:
+        rgb.setColorAll(0xff0000)  # Red
+    elif humidity >= 60:
+        rgb.setColorAll(0x0000ff)  # Blue
+    else:
+        rgb.setColorAll(0x00ff00)  # Green by default if outside specified ranges
+    
+# Make the M5Stack vibrate if CO2 level exceeds 600 ppm
+    if co2 > 600:
+        power.setVibrationEnable(True)  # Turn on the vibrator
+        wait(1)  # Vibrate for 1 seconds
+        power.setVibrationEnable(False)  # Turn off the vibrator
+
+# Function to update and display sensor values
+def update_display():
+    # Clear only the sensor data area
+    lcd.rect(100, 50, 110, 70, 0x6fdddb, 0x6fdddb)
+    lcd.rect(240, 10, 310, 40, 0x6fdddb, 0x6fdddb)
+    lcd.rect(240, 50, 310, 70, 0x6fdddb, 0x6fdddb)
+
+    display_sensor_info()
+
+# Function to send data to BigQuery
+def send_data_to_bigquery():
+    temperature = env3_0.temperature
+    humidity = env3_0.humidity
+    co2 = tvoc_1.eCO2
+    date_string_bq, time_string_bq, _, _ = get_datetime_strings()
+    if date_string_bq and time_string_bq:
+        outdoor_temp = get_outdoor_weather()
+        try:
+            data = {
+                "passwd": password_hash,
+                "values": {
+                    "date": date_string_bq,
+                    "time": time_string_bq,
+                    "indoor_temp": temperature,
+                    "indoor_humidity": humidity,
+                    "outdoor_temp": outdoor_temp,
+                    "co2": co2  # Add CO2 level to data
+                }
+            }
+
+            headers = {"Content-Type": "application/json"}
+
+            # Print data for debugging
+            print("Sending data to BigQuery: ", json.dumps(data))
+
+            response = urequests.post(endpoint_url, headers=headers, data=json.dumps(data))
+            
+            if response.status_code == 200:
+                print("Données envoyées avec succès à BigQuery")
+            else:
+                print("Échec de l'envoi des données: ", response.status_code, response.text)
+                lcd.print("Erreur envoi: {}".format(response.status_code), 10, 240, lcd.RED)
+
+            response.close()
+        except Exception as e:
+            print("Erreur lors de l'envoi des données: ", e)
+            lcd.print("Erreur exception: {}".format(e), 10, 260, lcd.RED)
+
+# Function to start sending data to BigQuery every minute in a separate thread
+def bigquery_thread():
+    while True:
+        send_data_to_bigquery()
+        utime.sleep(300)  # Wait for 300 seconds before the next send
+
+# Start the thread for sending data to BigQuery
+_thread.start_new_thread(bigquery_thread, ())
+
+# Sync time with NTP on startup
+sync_ntp_time()
+
+# Get initial static data
+outdoor_temp = get_outdoor_weather()
+outdoor_forecast = get_5_day_forecast()
+
+# Display static information
+display_static_info(outdoor_temp, outdoor_forecast)
+
+# Test the weather advice function
+test_weather_advice()
+
+# Add a global variable to store the time of the last motion alert
+last_motion_time = 0
+
+# Function to check for motion and play a specific audio file
+def check_motion_and_play(file_path):
+    global last_motion_time
+    
+    # Check if the PIR sensor detects motion
+    if pir_0.state:
+        current_time = utime.time()
+        # Check if at least one minute has passed since the last motion alert
+        if current_time - last_motion_time >= 60:
+            # Play the audio file if the timeout is respected
+            speaker.playWAV(file_path, volume=6)
+            # Update the time of the last motion alert
+            last_motion_time = current_time
+    else:
+        lcd.print(".", 0, 140)
+
+# Main loop to continually update the internal sensor display
+while True:
+    update_display()
+    check_motion_and_play('/flash/output.wav')  # Provide the audio file path
+    wait(3)  # Wait for 3 seconds
