@@ -10,6 +10,56 @@ import ntptime # Import ntptime for network time protocol functions
 import utime # Import utility time functions
 import _thread # Import threading library
 from urllib.parse import quote # Import URL quoting for handling URLs
+import network
+
+
+# Define WiFi parameters
+WIFI_SSID_1 = "iot-unil"
+WIFI_PASSWORD_1 = "4u6uch4hpY9pJ2f9"
+WIFI_SSID_2 = "netplus-e8914a"
+WIFI_PASSWORD_2 = "wtxv9quj"
+
+# Function to connect to WiFi
+def connect_wifi():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    
+    # Try to connect to the first WiFi network
+    lcd.setColor(lcd.RED)
+    lcd.print("Connecting to WiFi 1...", 0, 0)
+    wlan.connect(WIFI_SSID_1, WIFI_PASSWORD_1)
+    timeout = 10  # Timeout for the first WiFi connection attempt (in seconds)
+    start_time = time.ticks_ms()
+    while not wlan.isconnected() and time.ticks_diff(time.ticks_ms(), start_time) < timeout * 1000:
+        pass
+    
+    # Check if the connection to the first WiFi network succeeded
+    if wlan.isconnected():
+        ip_address = wlan.ifconfig()[0]
+        lcd.setColor(lcd.WHITE)
+        lcd.print("Connected to WiFi 1: {}".format(ip_address), 0, 0)
+        print('Connected to WiFi:', ip_address)
+    else:
+        # If connection to the first WiFi network fails, try the second one
+        lcd.setColor(lcd.RED)
+        lcd.print("Connecting to WiFi 2...", 0, 0)
+        wlan.connect(WIFI_SSID_2, WIFI_PASSWORD_2)
+        timeout = 10  # Timeout for the second WiFi connection attempt (in seconds)
+        start_time = time.ticks_ms()
+        while not wlan.isconnected() and time.ticks_diff(time.ticks_ms(), start_time) < timeout * 1000:
+            pass
+        if wlan.isconnected():
+            ip_address = wlan.ifconfig()[0]
+            lcd.setColor(lcd.WHITE)
+            lcd.print("Connected to WiFi 2: {}".format(ip_address), 0, 0)
+            print('Connected to WiFi:', ip_address)
+        else:
+            lcd.setColor(lcd.RED)
+            lcd.print("Failed to connect to WiFi 2", 0, 0)
+
+# Call the function to connect to WiFi
+connect_wifi()
+
 
 # Initialize the M5Stack screen
 screen = M5Screen()
@@ -93,7 +143,7 @@ def get_datetime_strings():
         # Format the date string for display (Month/Day)
         date_string_display = "{:02d}/{:02d}".format(dt[1], dt[2])
         # Format the time string for display (Hour:Minute)
-        time_string_display = "{:02}:{:02}".format(dt[4], dt[5])
+        time_string_display = "{:02}h{:02}".format(dt[4], dt[5])
         return date_string_bq, time_string_bq, date_string_display, time_string_display
     except Exception as e:
         print("Erreur lors de la récupération de l'heure actuelle:", e)
