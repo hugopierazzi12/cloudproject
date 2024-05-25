@@ -12,7 +12,7 @@
 
 ## Trailer and Explanation
 
-[![Youtube Video](https://imgur.com/l7QXu4L.png)](https://youtu.be/xZMuOwHl4E0) 
+[Youtube Video](https://youtu.be/xZMuOwHl4E0) 
 
 <br>
 
