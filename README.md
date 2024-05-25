@@ -67,4 +67,14 @@ This file contains the complete code for our M5Stack. It defines the Flask route
 |       |      |
 
 
+<table>
+  <tr>
+    <th style="background-color:lightblue;">Kevin</th>
+    <th style="background-color:lightgreen;">Hugo</th>
+  </tr>
+  <tr>
+    <td style="background-color:#f0f0f0; height:200px;"></td>
+    <td style="background-color:#f0f0f0; height:200px;"></td>
+  </tr>
+</table>
 
