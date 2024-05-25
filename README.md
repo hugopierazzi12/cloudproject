@@ -1,6 +1,23 @@
 # Google Weather
 ### *Kevin Pocthier and Hugo Pierazzi*
 
+## Distribution of Work
+
+<table style="width:100%; border: 2px solid black;">
+  <tr>
+    <th style="background-color:#1E90FF; color:white; padding:10px;">Kevin</th>
+    <th style="background-color:#000000; color:white; padding:10px;">Hugo</th>
+  </tr>
+  <tr>
+    <td style="background-color:#f0f0f0; padding:20px; vertical-align:top;">
+      M5Stack Visual, Sensors, Flask, Video, (450 lines approximately)
+    </td>
+    <td style="background-color:#f0f0f0; padding:20px; vertical-align:top;">
+      Flask, BigQuery, Text-To-Speech, Video (450 lines approximately)
+    </td>
+  </tr>
+</table>
+
 <br>
 <br>
 
@@ -83,19 +100,4 @@ For the presentation of our screen on the M5Stack device, we decided to display 
 To enhance the user experience, we integrated vocal announcements of the current weather, triggered by the motion sensor. This feature allows users to get the weather information just before leaving the house. Additionally, the information is updated every three seconds to ensure real-time accuracy. These design choices were made to maximize usability and efficiency in a compact and user-friendly format.
 
 
-## Distribution of Work
 
-<table style="width:100%; border: 2px solid black;">
-  <tr>
-    <th style="background-color:#1E90FF; color:white; padding:10px;">Kevin</th>
-    <th style="background-color:#000000; color:white; padding:10px;">Hugo</th>
-  </tr>
-  <tr>
-    <td style="background-color:#f0f0f0; padding:20px; vertical-align:top;">
-      M5Stack Visual, Sensors, Flask, Video, (450 lines approximately)
-    </td>
-    <td style="background-color:#f0f0f0; padding:20px; vertical-align:top;">
-      Flask, BigQuery, Text-To-Speech, Video (450 lines approximately)
-    </td>
-  </tr>
-</table>
