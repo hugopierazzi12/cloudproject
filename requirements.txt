@@ -35,6 +35,7 @@ MarkupSafe
 matplotlib
 mdurl
 numpy
+openai
 packaging
 pandas
 pillow
@@ -62,3 +63,4 @@ tornado
 typing_extensions
 tzdata
 urllib3
+google-cloud-texttospeech
