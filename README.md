@@ -1,9 +1,14 @@
 # Google Weather
 ### *Kevin Pocthier and Hugo Pierazzi*
 
+<br>
+<br>
+
 <p align="center">
   <img src="https://imgur.com/l7QXu4L.png" alt="Google Weather">
 </p>
+
+<br>
 
 
 ##Google Weather IoT Solution
@@ -50,6 +55,4 @@ This file contains the complete code for our M5Stack. It defines the Flask route
 - Vibration alert when CO2 levels exceed 600 ppm, indicating poor air quality.
 - LED indicators: Red when humidity is between 40-59%, blue when above 60%, and green when below 40%.
 
----
 
-Feel free to further customize this text as needed!
