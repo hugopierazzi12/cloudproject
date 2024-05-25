@@ -69,10 +69,10 @@ This file contains the complete code for our M5Stack. It defines the Flask route
   </tr>
   <tr>
     <td style="background-color:#f0f0f0; height:200px;">
-      M5Stack Visual, Sensors, Flask
+      M5Stack Visual, Sensors, Flask, Video, (450 lines approximately)
     </td>
     <td style="background-color:#f0f0f0; height:200px;">
-      Flask
+      Flask, BigQuery, Text-To-Speech, Video (450 lines approximately)
     </td>
   </tr>
 </table>
