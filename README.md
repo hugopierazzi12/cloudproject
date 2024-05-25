@@ -5,14 +5,14 @@
 <br>
 
 <p align="center">
-  <img src="https://imgur.com/l7QXu4L.png" alt="Google Weather">
+  <img src="https://imgur.com/l7QXu4L.png" alt="Google Weather" style="width:50%;">
 </p>
 
 <br>
 
 ## Trailer and Explanation
 
-[Youtube Video](https://youtu.be/xZMuOwHl4E0)
+[![Youtube Video](https://imgur.com/l7QXu4L.png)](https://youtu.be/xZMuOwHl4E0) 
 
 <br>
 
@@ -61,20 +61,21 @@ This file contains the complete code for our M5Stack. It defines the Flask route
 - LED indicators: Red when humidity is between 40-59%, blue when above 60%, and green when below 40%.
 - Wifi solution: In the event of a connection failure, you can have back-up wifis.
 
+<br>
 
-<table>
+## Distribution of Work
+
+<table style="width:100%; border: 2px solid black;">
   <tr>
-    <th style="background-color:lightblue;">Kevin</th>
-    <th style="background-color:lightgreen;">Hugo</th>
+    <th style="background-color:#1E90FF; color:white; padding:10px;">Kevin</th>
+    <th style="background-color:#000000; color:white; padding:10px;">Hugo</th>
   </tr>
   <tr>
-    <td style="background-color:#f0f0f0; height:200px;">
+    <td style="background-color:#f0f0f0; padding:20px; vertical-align:top;">
       M5Stack Visual, Sensors, Flask, Video, (450 lines approximately)
     </td>
-    <td style="background-color:#f0f0f0; height:200px;">
+    <td style="background-color:#f0f0f0; padding:20px; vertical-align:top;">
       Flask, BigQuery, Text-To-Speech, Video (450 lines approximately)
     </td>
   </tr>
 </table>
-
-
